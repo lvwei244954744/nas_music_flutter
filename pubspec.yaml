@@ -1,0 +1,35 @@
+name: loml_nas_music
+description: "A multi-platform music player for Navidrome"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management (cached)
+  provider: ^6.1.5
+
+  # HTTP + XML (cached)
+  http: ^1.6.0
+  xml: ^6.6.1
+
+  # Fonts (cached)
+  google_fonts: ^6.3.3
+
+  # Local storage (cached)
+  path_provider: ^2.1.5
+
+  # Audio Playback
+  audioplayers: ^6.7.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
