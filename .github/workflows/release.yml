@@ -104,7 +104,9 @@ jobs:
         shell: bash
         run: |
           mkdir -p release
-          cp -R build/ios/iphoneos/Runner.app "release/NasMusic-${{ needs.check-version.outputs.version }}-ios.app"
+          APP=$(find build/ios -name "Runner.app" -type d | head -1)
+          echo "Found app at: $APP"
+          cp -R "$APP" "release/NasMusic-${{ needs.check-version.outputs.version }}-ios.app"
           cd release && zip -r "NasMusic-${{ needs.check-version.outputs.version }}-ios.zip" "NasMusic-${{ needs.check-version.outputs.version }}-ios.app" && rm -rf "NasMusic-${{ needs.check-version.outputs.version }}-ios.app"
       - uses: actions/upload-artifact@v4
         with:
@@ -125,7 +127,9 @@ jobs:
         shell: bash
         run: |
           mkdir -p release
-          cp -R build/macos/Build/Products/Release/Runner.app "release/NasMusic-${{ needs.check-version.outputs.version }}-macos.app"
+          APP=$(find build/macos -name "Runner.app" -type d | head -1)
+          echo "Found app at: $APP"
+          cp -R "$APP" "release/NasMusic-${{ needs.check-version.outputs.version }}-macos.app"
           cd release && zip -r "NasMusic-${{ needs.check-version.outputs.version }}-macos.zip" "NasMusic-${{ needs.check-version.outputs.version }}-macos.app" && rm -rf "NasMusic-${{ needs.check-version.outputs.version }}-macos.app"
       - uses: actions/upload-artifact@v4
         with:

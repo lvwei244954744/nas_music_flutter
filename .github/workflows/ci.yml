@@ -75,10 +75,17 @@ jobs:
           channel: stable
       - run: flutter pub get
       - run: flutter build ios --release --no-codesign
+      - name: Find and stage iOS app
+        shell: bash
+        run: |
+          APP=$(find build/ios -name "Runner.app" -type d | head -1)
+          echo "Found iOS app at: $APP"
+          mkdir -p build/ios-staging
+          cp -R "$APP" build/ios-staging/
       - uses: actions/upload-artifact@v4
         with:
           name: ios-release
-          path: build/ios/iphoneos/
+          path: build/ios-staging/
 
   build-macos:
     needs: analyze
@@ -90,10 +97,17 @@ jobs:
           channel: stable
       - run: flutter pub get
       - run: flutter build macos --release
+      - name: Find and stage macOS app
+        shell: bash
+        run: |
+          APP=$(find build/macos -name "Runner.app" -type d | head -1)
+          echo "Found macOS app at: $APP"
+          mkdir -p build/macos-staging
+          cp -R "$APP" build/macos-staging/
       - uses: actions/upload-artifact@v4
         with:
           name: macos-release
-          path: build/macos/Build/Products/Release/
+          path: build/macos-staging/
 
   build-web:
     needs: analyze
