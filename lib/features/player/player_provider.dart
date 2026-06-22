@@ -1,24 +1,32 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:audioplayers/audioplayers.dart' as audio;
 import '../../data/models/models.dart';
 import '../../core/api/subsonic_api.dart';
 
 class PlayerState extends ChangeNotifier {
-  final audio.AudioPlayer _player;
   final SubsonicApi? _api;
+  audio.AudioPlayer _player;
+  late final StreamSubscription<Duration> _positionSub;
+  late final StreamSubscription<Duration> _durationSub;
+  late final StreamSubscription<audio.PlayerState> _stateSub;
 
   PlayerState({SubsonicApi? api, audio.AudioPlayer? player})
       // ignore: prefer_initializing_formals
       : _api = api,
         _player = player ?? audio.AudioPlayer() {
-    _player.onPositionChanged.listen((pos) {
+    _subscribe();
+  }
+
+  void _subscribe() {
+    _positionSub = _player.onPositionChanged.listen((pos) {
       _position = pos;
     }, onError: _onPlatformError);
-    _player.onDurationChanged.listen((dur) {
+    _durationSub = _player.onDurationChanged.listen((dur) {
       _duration = dur;
       notifyListeners();
     }, onError: _onPlatformError);
-    _player.onPlayerStateChanged.listen((state) {
+    _stateSub = _player.onPlayerStateChanged.listen((state) {
       final wasPlaying = _isPlaying;
       _playerState = state;
       _isPlaying = state == audio.PlayerState.playing;
@@ -44,11 +52,23 @@ class PlayerState extends ChangeNotifier {
 
   void _onPlatformError(Object error, [StackTrace? stack]) {
     debugPrint('[PlayerState] Platform error: $error\n$stack');
+    final retry = currentSong;
     _playerState = audio.PlayerState.stopped;
     _isPlaying = false;
     _position = Duration.zero;
     _duration = Duration.zero;
-    notifyListeners();
+    _isTransitioning = false;
+    _positionSub.cancel();
+    _durationSub.cancel();
+    _stateSub.cancel();
+    _player.dispose();
+    _player = audio.AudioPlayer();
+    _subscribe();
+    if (retry != null) {
+      _fireAsync(() => _playSong(retry));
+    } else {
+      notifyListeners();
+    }
   }
 
   List<Song> get queue => List.unmodifiable(_queue);
@@ -74,11 +94,8 @@ class PlayerState extends ChangeNotifier {
     });
   }
 
-  Future<void> _playCurrent() async {
-    final song = currentSong;
-    if (song == null || _api == null) return;
-    if (_isTransitioning) return;
-    _isTransitioning = true;
+  Future<void> _playSong(Song song) async {
+    if (_api == null) return;
     final startedSongId = song.id;
     try {
       final url = _api.getStreamUrl(song.id);
@@ -91,6 +108,16 @@ class PlayerState extends ChangeNotifier {
       try { await _player.stop(); } catch (_) {}
       _currentIndex = -1;
       notifyListeners();
+    }
+  }
+
+  Future<void> _playCurrent() async {
+    final song = currentSong;
+    if (song == null || _api == null) return;
+    if (_isTransitioning) return;
+    _isTransitioning = true;
+    try {
+      await _playSong(song);
     } finally {
       _isTransitioning = false;
     }
@@ -313,6 +340,9 @@ class PlayerState extends ChangeNotifier {
 
   @override
   void dispose() {
+    _positionSub.cancel();
+    _durationSub.cancel();
+    _stateSub.cancel();
     _player.dispose();
     super.dispose();
   }
