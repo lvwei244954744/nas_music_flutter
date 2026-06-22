@@ -226,6 +226,7 @@ class _PlaylistsTabState extends State<_PlaylistsTab> {
           title: Text(pl.name),
           subtitle: Text('${pl.songCount ?? 0} 首', style: Theme.of(context).textTheme.bodySmall),
           trailing: PopupMenuButton<String>(
+            key: ValueKey('playlist_menu_${pl.id}'),
             icon: const Icon(Icons.more_horiz, size: 20, color: AppColors.textDarkMuted),
             onSelected: (v) async {
               if (v == 'edit') {

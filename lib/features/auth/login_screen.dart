@@ -29,15 +29,11 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final auth = context.read<AuthState>();
-    final success = await auth.login(
+    await auth.login(
       _urlController.text.trim(),
       _usernameController.text.trim(),
       _passwordController.text,
     );
-
-    if (success && mounted) {
-      Navigator.pushReplacementNamed(context, '/home');
-    }
   }
 
   @override
@@ -60,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Icon(Icons.music_note_rounded, size: 64, color: AppColors.primary),
                   const SizedBox(height: 16),
                   Text(
-                    'loml.nas.music',
+                    'NasMusic',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.displaySmall?.copyWith(color: AppColors.primary),
                   ),

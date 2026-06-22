@@ -75,6 +75,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
                   title: Text(song.title, style: const TextStyle(fontSize: 14)),
                   subtitle: Text('${song.artist ?? ''} · ${song.album ?? ''}', style: theme.textTheme.bodySmall),
                   trailing: PopupMenuButton<String>(
+                    key: ValueKey('playlist_song_menu_${song.id}'),
                     icon: const Icon(Icons.more_horiz, size: 20, color: AppColors.textDarkMuted),
                     onSelected: (v) {
                       if (v == 'play') {

@@ -35,7 +35,7 @@ class _AppState extends State<App> {
     final auth = context.watch<AuthState>();
 
     return MaterialApp(
-      title: 'loml.nas.music',
+      title: 'NasMusic',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
@@ -120,9 +120,9 @@ class _BottomNav extends StatelessWidget {
                 onTap: () => onTap(1),
               ),
               _NavItem(
-                icon: Icons.settings_outlined,
-                activeIcon: Icons.settings_rounded,
-                label: '设置',
+                icon: Icons.person_outline,
+                activeIcon: Icons.person_rounded,
+                label: '我的',
                 isActive: currentIndex == 2,
                 onTap: () => onTap(2),
               ),

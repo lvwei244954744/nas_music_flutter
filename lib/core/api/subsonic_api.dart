@@ -109,6 +109,12 @@ class SubsonicApi {
     return doc.findAllElements('album').map((e) => Album.fromJson(_parseElement(e))).toList();
   }
 
+  Future<List<Song>> getStarred() async {
+    final doc = await _get('getStarred');
+    if (!_isSuccess(doc)) throw Exception(_errorMessage(doc));
+    return doc.findAllElements('song').map((e) => Song.fromJson(_parseElement(e))).toList();
+  }
+
   Future<List<Playlist>> getPlaylists() async {
     final doc = await _get('getPlaylists');
     if (!_isSuccess(doc)) throw Exception(_errorMessage(doc));

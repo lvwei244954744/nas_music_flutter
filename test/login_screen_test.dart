@@ -17,7 +17,7 @@ void main() {
       ),
     );
 
-    expect(find.text('loml.nas.music'), findsOneWidget);
+    expect(find.text('NasMusic'), findsOneWidget);
     expect(find.text('连接你的 Navidrome 服务器'), findsOneWidget);
     expect(find.text('服务器地址'), findsOneWidget);
     expect(find.text('用户名'), findsOneWidget);

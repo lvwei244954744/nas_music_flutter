@@ -20,6 +20,8 @@ class MusicRepository {
 
   Future<List<Album>> getArtistAlbums(String id) => _api.getArtistAlbums(id);
 
+  Future<List<Song>> getStarred() => _api.getStarred();
+
   Future<List<Playlist>> getPlaylists() => _api.getPlaylists();
 
   Future<List<Song>> getPlaylistSongs(String id) => _api.getPlaylistSongs(id);

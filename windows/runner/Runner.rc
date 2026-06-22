@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.loml" "\0"
-            VALUE "FileDescription", "loml_nas_music" "\0"
+            VALUE "CompanyName", "NasMusic" "\0"
+            VALUE "FileDescription", "NasMusic" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "loml_nas_music" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.loml. All rights reserved." "\0"
             VALUE "OriginalFilename", "loml_nas_music.exe" "\0"
-            VALUE "ProductName", "loml_nas_music" "\0"
+            VALUE "ProductName", "NasMusic" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -169,6 +169,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                             Text(_formatDuration(song.duration ?? 0), style: theme.textTheme.bodySmall),
                             const SizedBox(width: 8),
                             PopupMenuButton<String>(
+                              key: ValueKey('album_song_menu_${song.id}'),
                               icon: const Icon(Icons.more_horiz, size: 20, color: AppColors.textDarkMuted),
                               onSelected: (v) {
                                 if (v == 'play') {
