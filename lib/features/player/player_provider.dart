@@ -74,12 +74,14 @@ class PlayerState extends ChangeNotifier {
     try {
       final url = _api.getStreamUrl(song.id);
       debugPrint('[PlayerState] Playing: ${song.title} url=$url');
+      await _player.stop();
       await _player.play(audio.UrlSource(url));
     } catch (e, stack) {
       if (currentSong?.id != startedSongId) return;
       debugPrint('[PlayerState] Error playing ${song.title}: $e\n$stack');
       try { await _player.stop(); } catch (_) {}
-      try { await next(); } catch (_) {}
+      _currentIndex = -1;
+      notifyListeners();
     } finally {
       _isTransitioning = false;
     }
