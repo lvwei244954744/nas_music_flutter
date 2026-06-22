@@ -8,8 +8,9 @@ class PlayerState extends ChangeNotifier {
   final SubsonicApi? _api;
 
   PlayerState({SubsonicApi? api, audio.AudioPlayer? player})
-      : _player = player ?? audio.AudioPlayer(),
-        _api = api {
+      // ignore: prefer_initializing_formals
+      : _api = api,
+        _player = player ?? audio.AudioPlayer() {
     _player.onPositionChanged.listen((pos) {
       _position = pos;
       notifyListeners();
@@ -20,7 +21,6 @@ class PlayerState extends ChangeNotifier {
     });
     _player.onPlayerStateChanged.listen((state) {
       final wasPlaying = _isPlaying;
-      final wasCompleted = _playerState == audio.PlayerState.completed;
       _playerState = state;
       _isPlaying = state == audio.PlayerState.playing;
       if (wasPlaying && state == audio.PlayerState.completed) {

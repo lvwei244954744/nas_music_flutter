@@ -53,14 +53,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _countAlbums('frequent'),
         _countSongs(),
       ], eagerError: false);
-      if (mounted) setState(() {
-        _starredCount = (results[0] as List).length;
-        _frequentCount = results[1] as int;
-        _songCount = results[2] as int;
-        _statsLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _starredCount = (results[0] as List).length;
+          _frequentCount = results[1] as int;
+          _songCount = results[2] as int;
+          _statsLoading = false;
+        });
+      }
     } catch (_) {
-      if (mounted) setState(() => _statsLoading = false);
+      if (mounted) {
+        setState(() => _statsLoading = false);
+      }
     }
   }
 

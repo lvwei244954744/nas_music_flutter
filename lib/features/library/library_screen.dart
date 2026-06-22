@@ -296,16 +296,20 @@ class _SongsTabState extends State<_SongsTab> {
     try {
       final api = context.read<AuthState>().api;
       final data = await api.searchSongs(query: '', count: _pageSize, offset: 0);
-      if (mounted) setState(() {
-        _songs
-          ..clear()
-          ..addAll(data);
-        _hasMore = data.length >= _pageSize;
-        _offset = data.length;
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _songs
+            ..clear()
+            ..addAll(data);
+          _hasMore = data.length >= _pageSize;
+          _offset = data.length;
+          _loading = false;
+        });
+      }
     } catch (_) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 
@@ -315,14 +319,18 @@ class _SongsTabState extends State<_SongsTab> {
     try {
       final api = context.read<AuthState>().api;
       final data = await api.searchSongs(query: '', count: _pageSize, offset: _offset);
-      if (mounted) setState(() {
-        _songs.addAll(data);
-        _hasMore = data.length >= _pageSize;
-        _offset += data.length;
-        _loadingMore = false;
-      });
+      if (mounted) {
+        setState(() {
+          _songs.addAll(data);
+          _hasMore = data.length >= _pageSize;
+          _offset += data.length;
+          _loadingMore = false;
+        });
+      }
     } catch (_) {
-      if (mounted) setState(() => _loadingMore = false);
+      if (mounted) {
+        setState(() => _loadingMore = false);
+      }
     }
   }
 
