@@ -7,9 +7,9 @@ import '../../core/api/subsonic_api.dart';
 class PlayerState extends ChangeNotifier {
   final SubsonicApi? _api;
   audio.AudioPlayer _player;
-  late final StreamSubscription<Duration> _positionSub;
-  late final StreamSubscription<Duration> _durationSub;
-  late final StreamSubscription<audio.PlayerState> _stateSub;
+  late StreamSubscription<Duration> _positionSub;
+  late StreamSubscription<Duration> _durationSub;
+  late StreamSubscription<audio.PlayerState> _stateSub;
 
   PlayerState({SubsonicApi? api, audio.AudioPlayer? player})
       // ignore: prefer_initializing_formals
