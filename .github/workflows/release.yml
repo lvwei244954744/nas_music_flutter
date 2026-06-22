@@ -56,11 +56,12 @@ jobs:
       - run: flutter pub get
       - run: flutter build windows --release
       - name: Package artifact
-        shell: bash
+        shell: pwsh
         run: |
-          mkdir -p release
-          mv build/windows/x64/runner/Release "release/NasMusic-${{ needs.check-version.outputs.version }}-windows"
-          cd release && zip -r "NasMusic-${{ needs.check-version.outputs.version }}-windows.zip" "NasMusic-${{ needs.check-version.outputs.version }}-windows" && rm -rf "NasMusic-${{ needs.check-version.outputs.version }}-windows"
+          New-Item -ItemType Directory -Path release -Force
+          Move-Item -Path build/windows/x64/runner/Release -Destination "release/NasMusic-${{ needs.check-version.outputs.version }}-windows"
+          Compress-Archive -Path "release/NasMusic-${{ needs.check-version.outputs.version }}-windows" -DestinationPath "release/NasMusic-${{ needs.check-version.outputs.version }}-windows.zip"
+          Remove-Item -Recurse -Force "release/NasMusic-${{ needs.check-version.outputs.version }}-windows"
       - uses: actions/upload-artifact@v4
         with:
           name: windows-${{ needs.check-version.outputs.version }}
@@ -181,7 +182,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: ${{ needs.check-version.outputs.version }}
+          pattern: "*-${{ needs.check-version.outputs.version }}"
           merge-multiple: true
       - name: List release assets
         shell: bash
