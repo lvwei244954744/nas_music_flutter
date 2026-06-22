@@ -103,8 +103,16 @@ jobs:
       - name: Package artifact
         shell: bash
         run: |
+          echo "=== build/ios contents ==="
+          find build/ios -maxdepth 5 -type d | head -30
+          echo "=== .app files ==="
+          find build/ios -name "*.app" -type d 2>/dev/null | head -5
           mkdir -p release
-          APP=$(find build/ios -name "Runner.app" -type d | head -1)
+          APP=$(find build/ios -name "*.app" -type d | head -1)
+          if [ -z "$APP" ]; then
+            echo "ERROR: No .app found in build/ios"
+            exit 1
+          fi
           echo "Found app at: $APP"
           cp -R "$APP" "release/NasMusic-${{ needs.check-version.outputs.version }}-ios.app"
           cd release && zip -r "NasMusic-${{ needs.check-version.outputs.version }}-ios.zip" "NasMusic-${{ needs.check-version.outputs.version }}-ios.app" && rm -rf "NasMusic-${{ needs.check-version.outputs.version }}-ios.app"
@@ -126,8 +134,16 @@ jobs:
       - name: Package artifact
         shell: bash
         run: |
+          echo "=== build/macos contents ==="
+          find build/macos -maxdepth 5 -type d | head -30
+          echo "=== .app files ==="
+          find build/macos -name "*.app" -type d 2>/dev/null | head -5
           mkdir -p release
-          APP=$(find build/macos -name "Runner.app" -type d | head -1)
+          APP=$(find build/macos -name "*.app" -type d | head -1)
+          if [ -z "$APP" ]; then
+            echo "ERROR: No .app found in build/macos"
+            exit 1
+          fi
           echo "Found app at: $APP"
           cp -R "$APP" "release/NasMusic-${{ needs.check-version.outputs.version }}-macos.app"
           cd release && zip -r "NasMusic-${{ needs.check-version.outputs.version }}-macos.zip" "NasMusic-${{ needs.check-version.outputs.version }}-macos.app" && rm -rf "NasMusic-${{ needs.check-version.outputs.version }}-macos.app"
