@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=NasMusic
+Comment=Navidrome music player
+Exec=loml_nas_music
+Icon=audio-headset
+Terminal=false
+Type=Application
+Categories=Audio;Music;Player;
+StartupNotify=true
+StartupWMClass=loml_nas_music
+Keywords=music;player;navidrome;subsonic;
