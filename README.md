@@ -39,7 +39,7 @@ A multi-platform music player for [Navidrome](https://www.navidrome.org/) (Subso
 ### Install
 
 ```bash
-git clone https://github.com/YOUR_USER/loml_nas_music.git
+git clone https://github.com/lvwei244954744/nas_music_flutter.git
 cd loml_nas_music
 flutter pub get
 ```
