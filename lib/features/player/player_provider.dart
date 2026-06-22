@@ -13,11 +13,11 @@ class PlayerState extends ChangeNotifier {
         _player = player ?? audio.AudioPlayer() {
     _player.onPositionChanged.listen((pos) {
       _position = pos;
-    });
+    }, onError: _onPlatformError);
     _player.onDurationChanged.listen((dur) {
       _duration = dur;
       notifyListeners();
-    });
+    }, onError: _onPlatformError);
     _player.onPlayerStateChanged.listen((state) {
       final wasPlaying = _isPlaying;
       _playerState = state;
@@ -28,7 +28,7 @@ class PlayerState extends ChangeNotifier {
       if (wasPlaying != _isPlaying) {
         notifyListeners();
       }
-    });
+    }, onError: _onPlatformError);
   }
 
   List<Song> _queue = [];
@@ -41,6 +41,15 @@ class PlayerState extends ChangeNotifier {
   audio.PlayerState _playerState = audio.PlayerState.stopped;
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
+
+  void _onPlatformError(Object error, [StackTrace? stack]) {
+    debugPrint('[PlayerState] Platform error: $error\n$stack');
+    _playerState = audio.PlayerState.stopped;
+    _isPlaying = false;
+    _position = Duration.zero;
+    _duration = Duration.zero;
+    notifyListeners();
+  }
 
   List<Song> get queue => List.unmodifiable(_queue);
   Song? get currentSong => _currentIndex >= 0 && _currentIndex < _queue.length ? _queue[_currentIndex] : null;
