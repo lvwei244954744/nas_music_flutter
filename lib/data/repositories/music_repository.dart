@@ -24,6 +24,8 @@ class MusicRepository {
 
   Future<List<Song>> getPlaylistSongs(String id) => _api.getPlaylistSongs(id);
 
+  Future<List<Song>> searchSongs({String query = '', int count = 50, int offset = 0}) => _api.searchSongs(query: query, count: count, offset: offset);
+
   Future<List<Object>> search(String query, {int count = 50}) => _api.search(query, count: count);
 
   String getStreamUrl(String id) => _api.getStreamUrl(id);

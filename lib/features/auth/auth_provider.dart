@@ -92,9 +92,11 @@ class AuthState extends ChangeNotifier {
       final file = File('${dir.path}/session.json');
       if (await file.exists()) {
         final data = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
+        _serverUrl = data['serverUrl'] as String;
+        _username = data['username'] as String;
         _api.setCredentials(
-          data['serverUrl'] as String,
-          data['username'] as String,
+          _serverUrl!,
+          _username!,
           data['password'] as String,
         );
       }

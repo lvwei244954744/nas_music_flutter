@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/format_utils.dart';
 import '../../core/api/subsonic_api.dart';
 import '../../data/models/models.dart';
 import '../auth/auth_provider.dart';
+import '../player/player_provider.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -18,7 +20,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -41,12 +43,12 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
           unselectedLabelColor: AppColors.textDarkMuted,
           indicatorColor: AppColors.primary,
           indicatorSize: TabBarIndicatorSize.label,
-          tabs: const [Tab(text: '歌手'), Tab(text: '专辑'), Tab(text: '歌单')],
+          tabs: const [Tab(text: '歌手'), Tab(text: '专辑'), Tab(text: '歌单'), Tab(text: '歌曲')],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [_ArtistsTab(), _AlbumsTab(), _PlaylistsTab()],
+        children: const [_ArtistsTab(), _AlbumsTab(), _PlaylistsTab(), _SongsTab()],
       ),
     );
   }
@@ -248,6 +250,123 @@ class _PlaylistsTabState extends State<_PlaylistsTab> {
           onTap: () => Navigator.pushNamed(context, '/playlist/${pl.id}'),
         );
       },
+    );
+  }
+}
+
+class _SongsTab extends StatefulWidget {
+  const _SongsTab();
+  @override
+  State<_SongsTab> createState() => _SongsTabState();
+}
+
+class _SongsTabState extends State<_SongsTab> {
+  final List<Song> _songs = [];
+  final ScrollController _scrollController = ScrollController();
+  bool _loading = true;
+  bool _loadingMore = false;
+  bool _hasMore = true;
+  int _offset = 0;
+  static const int _pageSize = 50;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200
+        && !_loadingMore && _hasMore) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _load() async {
+    setState(() { _loading = true; _hasMore = true; _offset = 0; });
+    try {
+      final api = context.read<AuthState>().api;
+      final data = await api.searchSongs(query: '', count: _pageSize, offset: 0);
+      if (mounted) setState(() {
+        _songs
+          ..clear()
+          ..addAll(data);
+        _hasMore = data.length >= _pageSize;
+        _offset = data.length;
+        _loading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (!_hasMore || _loadingMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      final api = context.read<AuthState>().api;
+      final data = await api.searchSongs(query: '', count: _pageSize, offset: _offset);
+      if (mounted) setState(() {
+        _songs.addAll(data);
+        _hasMore = data.length >= _pageSize;
+        _offset += data.length;
+        _loadingMore = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _loadingMore = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_songs.isEmpty) return Center(child: Text('暂无歌曲', style: Theme.of(context).textTheme.bodyMedium));
+
+    final theme = Theme.of(context);
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView.builder(
+        controller: _scrollController,
+        itemCount: _songs.length + (_loadingMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == _songs.length) {
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            );
+          }
+          final song = _songs[index];
+          return ListTile(
+            leading: SizedBox(
+              width: 40,
+              child: Center(
+                child: Text('${index + 1}', style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textDarkMuted)),
+              ),
+            ),
+            title: Text(song.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+            subtitle: Text(
+              [song.artist, song.album].where((e) => e != null && e.isNotEmpty).join(' - '),
+              maxLines: 1, overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall,
+            ),
+            trailing: song.duration != null
+                ? Text(formatSeconds(song.duration!), style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textDarkMuted))
+                : null,
+            onTap: () {
+              final player = context.read<PlayerState>();
+              player.playList(_songs, startIndex: index);
+            },
+          );
+        },
+      ),
     );
   }
 }

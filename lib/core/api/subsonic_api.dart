@@ -145,6 +145,22 @@ class SubsonicApi {
     return doc.findAllElements('entry').map((e) => Song.fromJson(_parseElement(e))).toList();
   }
 
+  Future<List<Song>> searchSongs({
+    String query = '',
+    int count = 50,
+    int offset = 0,
+  }) async {
+    final doc = await _get('search3', {
+      'query': query,
+      'songCount': count.toString(),
+      'songOffset': offset.toString(),
+      'artistCount': '0',
+      'albumCount': '0',
+    });
+    if (!_isSuccess(doc)) throw Exception(_errorMessage(doc));
+    return doc.findAllElements('song').map((e) => Song.fromJson(_parseElement(e))).toList();
+  }
+
   Future<List<Object>> search(String query, {int count = 50}) async {
     final doc = await _get('search3', {
       'query': query,
