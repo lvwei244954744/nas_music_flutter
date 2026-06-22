@@ -13,7 +13,6 @@ class PlayerState extends ChangeNotifier {
         _player = player ?? audio.AudioPlayer() {
     _player.onPositionChanged.listen((pos) {
       _position = pos;
-      notifyListeners();
     });
     _player.onDurationChanged.listen((dur) {
       _duration = dur;
@@ -58,6 +57,7 @@ class PlayerState extends ChangeNotifier {
   String? get currentCoverArt => currentSong?.coverArt;
   String? get currentAlbumId => currentSong?.albumId;
   String? get currentSongId => currentSong?.id;
+  Stream<Duration> get positionStream => _player.onPositionChanged;
 
   void _fireAsync(Future<void> Function() fn) {
     fn().catchError((e, stack) {

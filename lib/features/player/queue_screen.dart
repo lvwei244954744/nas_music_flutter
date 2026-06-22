@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/api/subsonic_api.dart';
 import 'player_provider.dart';
@@ -63,9 +64,9 @@ class QueueScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(6),
                             color: AppColors.darkCard,
-                            image: (song.coverArt?.isNotEmpty ?? false)
-                                ? DecorationImage(image: NetworkImage(api.getCoverArtUrl(song.coverArt!)), fit: BoxFit.cover)
-                                : null,
+                    image: (song.coverArt?.isNotEmpty ?? false)
+                        ? DecorationImage(image: CachedNetworkImageProvider(api.getCoverArtUrl(song.coverArt!, size: 80)), fit: BoxFit.cover)
+                        : null,
                           ),
                           child: (song.coverArt?.isEmpty ?? true)
                               ? Icon(Icons.music_note_outlined, size: 20, color: AppColors.textDarkMuted)

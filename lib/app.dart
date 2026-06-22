@@ -62,13 +62,13 @@ class _MainShellState extends State<_MainShell> {
 
   @override
   Widget build(BuildContext context) {
-    final player = context.watch<PlayerState>();
+    final hasCurrent = context.select<PlayerState, bool>((p) => p.hasCurrent);
 
     return Scaffold(
       body: Column(
         children: [
           Expanded(child: _screens[_currentTab]),
-          if (player.hasCurrent)
+          if (hasCurrent)
             const MiniPlayerBar(),
           _BottomNav(
             currentIndex: _currentTab,

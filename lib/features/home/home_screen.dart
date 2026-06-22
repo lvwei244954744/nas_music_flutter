@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/api/subsonic_api.dart';
 import '../../data/models/models.dart';
@@ -132,62 +133,64 @@ class _AlbumCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, '/album/${album.id}'),
-      child: SizedBox(
-        width: 140,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: AppColors.darkCard,
-                  image: (album.coverArt?.isNotEmpty ?? false)
-                      ? DecorationImage(image: NetworkImage(api.getCoverArtUrl(album.coverArt!)), fit: BoxFit.cover)
-                      : null,
-                ),
-                child: Stack(
-                  children: [
-                    if (album.coverArt?.isEmpty ?? true)
-                      const Center(child: Icon(Icons.album_outlined, size: 40, color: AppColors.textDarkMuted)),
-                    Positioned(
-                      right: 8,
-                      bottom: 8,
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.primary,
-                        ),
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                          color: Colors.white,
-                          onPressed: () async {
-                            final api = context.read<SubsonicApi>();
-                            try {
-                              final songs = await api.getAlbumSongs(album.id);
-                              if (context.mounted) {
-                                context.read<PlayerState>().playList(songs, startIndex: 0);
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTap: () => Navigator.pushNamed(context, '/album/${album.id}'),
+        child: SizedBox(
+          width: 140,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: AppColors.darkCard,
+                    image: (album.coverArt?.isNotEmpty ?? false)
+                        ? DecorationImage(image: CachedNetworkImageProvider(api.getCoverArtUrl(album.coverArt!, size: 200)), fit: BoxFit.cover)
+                        : null,
+                  ),
+                  child: Stack(
+                    children: [
+                      if (album.coverArt?.isEmpty ?? true)
+                        const Center(child: Icon(Icons.album_outlined, size: 40, color: AppColors.textDarkMuted)),
+                      Positioned(
+                        right: 8,
+                        bottom: 8,
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.primary,
+                          ),
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            icon: const Icon(Icons.play_arrow_rounded, size: 18),
+                            color: Colors.white,
+                            onPressed: () async {
+                              final api = context.read<SubsonicApi>();
+                              try {
+                                final songs = await api.getAlbumSongs(album.id);
+                                if (context.mounted) {
+                                  context.read<PlayerState>().playList(songs, startIndex: 0);
+                                }
+                              } catch (e) {
+                                debugPrint('[HomeScreen] Failed to load songs: $e');
                               }
-                            } catch (e) {
-                              debugPrint('[HomeScreen] Failed to load songs: $e');
-                            }
-                          },
+                            },
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(album.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodyLarge?.copyWith(fontSize: 13)),
-            Text(album.artist ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall),
-          ],
+              const SizedBox(height: 8),
+              Text(album.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodyLarge?.copyWith(fontSize: 13)),
+              Text(album.artist ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall),
+            ],
+          ),
         ),
       ),
     );

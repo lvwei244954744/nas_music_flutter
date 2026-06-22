@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/api/subsonic_api.dart';
 import '../../data/models/models.dart';
@@ -82,7 +83,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                             borderRadius: BorderRadius.circular(8),
                             color: AppColors.darkCard,
                             image: (a.coverArt?.isNotEmpty ?? false)
-                                ? DecorationImage(image: NetworkImage(api.getCoverArtUrl(a.coverArt!, size: 300)), fit: BoxFit.cover)
+                                ? DecorationImage(image: CachedNetworkImageProvider(api.getCoverArtUrl(a.coverArt!, size: 300)), fit: BoxFit.cover)
                                 : null,
                           ),
                           child: (a.coverArt?.isEmpty ?? true)

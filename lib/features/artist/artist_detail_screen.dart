@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/models.dart';
 import '../auth/auth_provider.dart';
@@ -73,25 +74,27 @@ class _ArtistDetailScreenState extends State<ArtistDetailScreen> {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final album = data[index];
-                      return GestureDetector(
-                        onTap: () => Navigator.pushNamed(context, '/album/${album.id}'),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8), color: AppColors.darkCard,
-                                  image: (album.coverArt?.isNotEmpty ?? false) ? DecorationImage(image: NetworkImage(api.getCoverArtUrl(album.coverArt!)), fit: BoxFit.cover) : null,
+                      return RepaintBoundary(
+                        child: GestureDetector(
+                          onTap: () => Navigator.pushNamed(context, '/album/${album.id}'),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8), color: AppColors.darkCard,
+                                    image: (album.coverArt?.isNotEmpty ?? false) ? DecorationImage(image: CachedNetworkImageProvider(api.getCoverArtUrl(album.coverArt!, size: 200)), fit: BoxFit.cover) : null,
+                                  ),
+                                  child: (album.coverArt?.isEmpty ?? true) ? Icon(Icons.album_outlined, size: 40, color: AppColors.textDarkMuted) : null,
                                 ),
-                                child: (album.coverArt?.isEmpty ?? true) ? Icon(Icons.album_outlined, size: 40, color: AppColors.textDarkMuted) : null,
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(album.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodyLarge?.copyWith(fontSize: 13)),
-                            if (album.year != null) Text(album.year.toString(), style: theme.textTheme.bodySmall),
-                          ],
+                              const SizedBox(height: 8),
+                              Text(album.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodyLarge?.copyWith(fontSize: 13)),
+                              if (album.year != null) Text(album.year.toString(), style: theme.textTheme.bodySmall),
+                            ],
+                          ),
                         ),
                       );
                     },

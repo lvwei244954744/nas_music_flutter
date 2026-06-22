@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/api/subsonic_api.dart';
 import 'player_provider.dart';
@@ -73,7 +74,7 @@ class _PlayerView extends StatelessWidget {
               ],
               image: (player.currentCoverArt?.isNotEmpty ?? false)
                   ? DecorationImage(
-                      image: NetworkImage(api.getCoverArtUrl(player.currentCoverArt!, size: 300)),
+                      image: CachedNetworkImageProvider(api.getCoverArtUrl(player.currentCoverArt!, size: 300)),
                       fit: BoxFit.cover,
                     )
                   : null,
@@ -99,30 +100,7 @@ class _PlayerView extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
-          SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              activeTrackColor: AppColors.primary,
-              inactiveTrackColor: AppColors.darkBorder,
-              thumbColor: AppColors.primary,
-              trackHeight: 3,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-            ),
-            child: Slider(
-              value: player.progress,
-              onChanged: player.hasCurrent ? (v) => player.seekTo(v) : null,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(_formatDuration(player.position), style: theme.textTheme.bodySmall),
-                Text(_formatDuration(player.duration), style: theme.textTheme.bodySmall),
-              ],
-            ),
-          ),
+          _ProgressSection(player: player),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -204,6 +182,55 @@ class _PlayerView extends StatelessWidget {
     );
   }
 
+}
+
+class _ProgressSection extends StatelessWidget {
+  final PlayerState player;
+  const _ProgressSection({required this.player});
+
+  @override
+  Widget build(BuildContext context) {
+    final duration = player.duration;
+    return StreamBuilder<Duration>(
+      stream: player.positionStream,
+      builder: (context, snapshot) {
+        final position = snapshot.data ?? Duration.zero;
+        final progress = duration.inMilliseconds > 0
+            ? position.inMilliseconds / duration.inMilliseconds
+            : 0.0;
+        final theme = Theme.of(context);
+        return Column(
+          children: [
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                activeTrackColor: AppColors.primary,
+                inactiveTrackColor: AppColors.darkBorder,
+                thumbColor: AppColors.primary,
+                trackHeight: 3,
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+              ),
+              child: Slider(
+                value: progress.clamp(0.0, 1.0),
+                onChanged: player.hasCurrent ? (v) => player.seekTo(v) : null,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(_formatDuration(position), style: theme.textTheme.bodySmall),
+                  Text(_formatDuration(duration), style: theme.textTheme.bodySmall),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   String _formatDuration(Duration d) {
     final min = d.inMinutes;
     final sec = d.inSeconds % 60;
@@ -262,7 +289,7 @@ class _QueueView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6),
                     color: AppColors.darkCard,
                     image: (song.coverArt?.isNotEmpty ?? false)
-                        ? DecorationImage(image: NetworkImage(api.getCoverArtUrl(song.coverArt!)), fit: BoxFit.cover)
+                        ? DecorationImage(image: CachedNetworkImageProvider(api.getCoverArtUrl(song.coverArt!, size: 80)), fit: BoxFit.cover)
                         : null,
                   ),
                   child: (song.coverArt?.isEmpty ?? true)

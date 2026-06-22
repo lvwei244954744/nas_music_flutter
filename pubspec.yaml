@@ -23,6 +23,9 @@ dependencies:
   # Local storage (cached)
   path_provider: ^2.1.5
 
+  # Image caching
+  cached_network_image: ^3.4.1
+
   # Audio Playback
   audioplayers: ^6.7.1
 

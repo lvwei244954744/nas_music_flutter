@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/api/subsonic_api.dart';
 import 'player_provider.dart';
@@ -42,7 +43,7 @@ class MiniPlayerBar extends StatelessWidget {
                 color: AppColors.darkCard,
                 image: (player.currentCoverArt?.isNotEmpty ?? false)
                     ? DecorationImage(
-                        image: NetworkImage(api.getCoverArtUrl(player.currentCoverArt!, size: 48)),
+                        image: CachedNetworkImageProvider(api.getCoverArtUrl(player.currentCoverArt!, size: 48)),
                         fit: BoxFit.cover,
                       )
                     : null,

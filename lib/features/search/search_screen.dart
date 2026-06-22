@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/models.dart';
 import '../auth/auth_provider.dart';
@@ -108,7 +109,7 @@ class _SearchScreenState extends State<SearchScreen> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(6), color: AppColors.darkCard,
                 image: (a.coverArt?.isNotEmpty ?? false)
-                    ? DecorationImage(image: NetworkImage(api.getCoverArtUrl(a.coverArt!)), fit: BoxFit.cover)
+                    ? DecorationImage(image: CachedNetworkImageProvider(api.getCoverArtUrl(a.coverArt!, size: 100)), fit: BoxFit.cover)
                     : null,
               ),
               child: (a.coverArt?.isEmpty ?? true) ? Icon(Icons.album_outlined, size: 24, color: AppColors.textDarkMuted) : null,
