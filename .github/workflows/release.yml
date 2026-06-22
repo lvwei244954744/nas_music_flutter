@@ -22,6 +22,8 @@ jobs:
           VERSION=$(grep 'version:' pubspec.yaml | head -1 | awk '{print $2}')
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Print version
+        run: echo "Building NasMusic v${{ steps.version.outputs.version }}"
 
   build-android:
     needs: check-version
@@ -33,10 +35,15 @@ jobs:
           channel: stable
       - run: flutter pub get
       - run: flutter build apk --release
+      - name: Package artifact
+        shell: bash
+        run: |
+          mkdir -p release
+          cp build/app/outputs/flutter-apk/app-release.apk release/NasMusic-${{ needs.check-version.outputs.version }}-android.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: NasMusic-${{ needs.check-version.outputs.version }}-android
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: android-${{ needs.check-version.outputs.version }}
+          path: release/
 
   build-windows:
     needs: check-version
@@ -48,10 +55,16 @@ jobs:
           channel: stable
       - run: flutter pub get
       - run: flutter build windows --release
+      - name: Package artifact
+        shell: bash
+        run: |
+          mkdir -p release
+          mv build/windows/x64/runner/Release "release/NasMusic-${{ needs.check-version.outputs.version }}-windows"
+          cd release && zip -r "NasMusic-${{ needs.check-version.outputs.version }}-windows.zip" "NasMusic-${{ needs.check-version.outputs.version }}-windows" && rm -rf "NasMusic-${{ needs.check-version.outputs.version }}-windows"
       - uses: actions/upload-artifact@v4
         with:
-          name: NasMusic-${{ needs.check-version.outputs.version }}-windows
-          path: build/windows/x64/runner/Release/
+          name: windows-${{ needs.check-version.outputs.version }}
+          path: release/
 
   build-linux:
     needs: check-version
@@ -66,10 +79,16 @@ jobs:
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
       - run: flutter pub get
       - run: flutter build linux --release
+      - name: Package artifact
+        shell: bash
+        run: |
+          mkdir -p release
+          mv build/linux/x64/release/bundle "release/NasMusic-${{ needs.check-version.outputs.version }}-linux"
+          cd release && zip -r "NasMusic-${{ needs.check-version.outputs.version }}-linux.zip" "NasMusic-${{ needs.check-version.outputs.version }}-linux" && rm -rf "NasMusic-${{ needs.check-version.outputs.version }}-linux"
       - uses: actions/upload-artifact@v4
         with:
-          name: NasMusic-${{ needs.check-version.outputs.version }}-linux
-          path: build/linux/x64/release/bundle/
+          name: linux-${{ needs.check-version.outputs.version }}
+          path: release/
 
   build-ios:
     needs: check-version
@@ -81,10 +100,16 @@ jobs:
           channel: stable
       - run: flutter pub get
       - run: flutter build ios --release --no-codesign
+      - name: Package artifact
+        shell: bash
+        run: |
+          mkdir -p release
+          cp -R build/ios/iphoneos/Runner.app "release/NasMusic-${{ needs.check-version.outputs.version }}-ios.app"
+          cd release && zip -r "NasMusic-${{ needs.check-version.outputs.version }}-ios.zip" "NasMusic-${{ needs.check-version.outputs.version }}-ios.app" && rm -rf "NasMusic-${{ needs.check-version.outputs.version }}-ios.app"
       - uses: actions/upload-artifact@v4
         with:
-          name: NasMusic-${{ needs.check-version.outputs.version }}-ios
-          path: build/ios/iphoneos/
+          name: ios-${{ needs.check-version.outputs.version }}
+          path: release/
 
   build-macos:
     needs: check-version
@@ -96,10 +121,16 @@ jobs:
           channel: stable
       - run: flutter pub get
       - run: flutter build macos --release
+      - name: Package artifact
+        shell: bash
+        run: |
+          mkdir -p release
+          cp -R build/macos/Build/Products/Release/Runner.app "release/NasMusic-${{ needs.check-version.outputs.version }}-macos.app"
+          cd release && zip -r "NasMusic-${{ needs.check-version.outputs.version }}-macos.zip" "NasMusic-${{ needs.check-version.outputs.version }}-macos.app" && rm -rf "NasMusic-${{ needs.check-version.outputs.version }}-macos.app"
       - uses: actions/upload-artifact@v4
         with:
-          name: NasMusic-${{ needs.check-version.outputs.version }}-macos
-          path: build/macos/Build/Products/Release/
+          name: macos-${{ needs.check-version.outputs.version }}
+          path: release/
 
   build-web:
     needs: check-version
@@ -111,10 +142,16 @@ jobs:
           channel: stable
       - run: flutter pub get
       - run: flutter build web --release
+      - name: Package artifact
+        shell: bash
+        run: |
+          mkdir -p release
+          mv build/web "release/NasMusic-${{ needs.check-version.outputs.version }}-web"
+          cd release && zip -r "NasMusic-${{ needs.check-version.outputs.version }}-web.zip" "NasMusic-${{ needs.check-version.outputs.version }}-web" && rm -rf "NasMusic-${{ needs.check-version.outputs.version }}-web"
       - uses: actions/upload-artifact@v4
         with:
-          name: NasMusic-${{ needs.check-version.outputs.version }}-web
-          path: build/web/
+          name: web-${{ needs.check-version.outputs.version }}
+          path: release/
 
   release:
     needs: [check-version, build-android, build-windows, build-linux, build-ios, build-macos, build-web]
@@ -124,30 +161,17 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: NasMusic-*
+          pattern: ${{ needs.check-version.outputs.version }}
           merge-multiple: true
-      - name: Prepare release assets
+      - name: List release assets
         shell: bash
-        run: |
-          ls -la
-          # Rename APK for clarity
-          mv app-release.apk NasMusic-android-${{ needs.check-version.outputs.version }}.apk 2>/dev/null || true
-          # Zip bundle directories
-          for dir in *.app linux macos ios windows web; do
-            if [ -d "$dir" ]; then
-              zip -r "NasMusic-${{ needs.check-version.outputs.version }}-${dir}.zip" "$dir"
-              rm -rf "$dir"
-            fi
-          done
-          ls -la
+        run: ls -la
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.check-version.outputs.tag }}
           name: NasMusic ${{ needs.check-version.outputs.version }}
           generate_release_notes: true
-          files: |
-            *.apk
-            *.zip
+          files: ./*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
