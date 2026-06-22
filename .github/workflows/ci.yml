@@ -78,8 +78,16 @@ jobs:
       - name: Find and stage iOS app
         shell: bash
         run: |
-          APP=$(find build/ios -name "Runner.app" -type d | head -1)
+          echo "=== build/ios contents ==="
+          find build/ios -maxdepth 5 -type d | head -30
+          echo "=== .app files ==="
+          find build/ios -name "*.app" -type d 2>/dev/null | head -5
+          APP=$(find build/ios -name "*.app" -type d | head -1)
           echo "Found iOS app at: $APP"
+          if [ -z "$APP" ]; then
+            echo "ERROR: No .app found in build/ios"
+            exit 1
+          fi
           mkdir -p build/ios-staging
           cp -R "$APP" build/ios-staging/
       - uses: actions/upload-artifact@v4
@@ -100,8 +108,16 @@ jobs:
       - name: Find and stage macOS app
         shell: bash
         run: |
-          APP=$(find build/macos -name "Runner.app" -type d | head -1)
+          echo "=== build/macos contents ==="
+          find build/macos -maxdepth 5 -type d | head -30
+          echo "=== .app files ==="
+          find build/macos -name "*.app" -type d 2>/dev/null | head -5
+          APP=$(find build/macos -name "*.app" -type d | head -1)
           echo "Found macOS app at: $APP"
+          if [ -z "$APP" ]; then
+            echo "ERROR: No .app found in build/macos"
+            exit 1
+          fi
           mkdir -p build/macos-staging
           cp -R "$APP" build/macos-staging/
       - uses: actions/upload-artifact@v4
